@@ -72,17 +72,21 @@ private:
 int main(int argc, char *argv[])
 {
 	ArgMap mappedArgs;
-	std::string usageStr = "Usage: ";
+	std::string usageStr = "USAGE: ";
 	std::vector<int> intVec;
-
-	usageStr += argv[0];
+	std::string appName = argv[0];
+	appName.erase(appName.cbegin(), appName.cbegin() + appName.find_last_of('\\') + 1);
+	appName.erase(appName.cbegin() + appName.find_first_of('.'), appName.cend());
+	usageStr += appName;
 	usageStr += " [OPTIONS] INPUT_VEC\n\n";
 	usageStr += "OPTIONS:\n\n";
-	usageStr += "\t\t-i --insertion-sort\t\t\tSort input vector through insertion sort\n";
-	usageStr += "\t\t-m --merge-sort\t\t\tSort input vector through merge sort\n";
-	usageStr += "\t\t-q --quick-sort\t\t\tSort input vector through quick sort\n";
+	usageStr += "\t-i --insertion-sort\t\tSort input vector through insertion sort\n";
+	usageStr += "\t-m --merge-sort\t\tSort input vector through merge sort\n";
+	usageStr += "\t-q --quick-sort\t\tSort input vector through quick sort\n";
+	usageStr += "\t-h --help\t\tThis screen\n\n";
+	usageStr += "INPUT_VEC: Space separated list of integers to sort.\n";
 
-	ParseArgs(argc, argv, "i[insertion-sort]m[merge-sort]q[quick-sort]", mappedArgs, usageStr);
+	ParseArgs(argc, argv, "h[help]i[insertion-sort]m[merge-sort]q[quick-sort]", mappedArgs, usageStr);
 
 	for (auto &opt : mappedArgs)
 	{
@@ -97,6 +101,10 @@ int main(int argc, char *argv[])
 		case 'q':
 			globalConfig.quickSort = true;
 			break;
+		case 'h':
+			std::cout << usageStr.c_str() << std::endl;
+			system("PAUSE");
+			return 0;
 		default: // mappedArgs[?]
 			StringToVec(opt.second, intVec);
 		}
