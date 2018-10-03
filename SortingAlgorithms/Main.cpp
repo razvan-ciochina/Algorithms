@@ -2,11 +2,20 @@
 #include <cassert>
 #include <utility>
 #include <vector>
+#include <string>
+#include <stdexcept>
+#include <algorithm>
 #include "ParseArgs.h"
 #include "InsertionSort.h"
 #include "QuickSort.h"
 #include "MergeSort.h"
+#ifdef _WIN32
 #include "Windows.h"
+#else 
+// LINUX
+	#include <unistd.h>
+	#include <limits.h>
+#endif
 
 class GlobalConfig
 {
@@ -20,16 +29,23 @@ public:
 
 void StringToVec(const std::string& input, std::vector<int>& outVec)
 {
-	auto& toConvertStart = input.begin();
-	auto& toConvertEnd = std::find(input.begin(), input.end(), ' ');
+	auto toConvertStart = input.begin();
+	auto toConvertEnd = std::find(input.begin(), input.end(), ' ');
 
 	// didn't really care about the speed with which this thing is run
 	while (toConvertEnd != input.end())
 	{
 		int converted = INT_MIN;
 
-		if (sscanf_s(input.substr(toConvertStart - input.begin(), toConvertEnd - toConvertStart).c_str(), "%d", &converted) > 0)
+		try {
+			converted=stoi(input.substr(toConvertStart - input.begin(), toConvertEnd - toConvertStart));
 			outVec.push_back(converted);
+		} catch (std::invalid_argument e) {
+			// no special exception handling
+			std::cout << "Invalid argument passed to string to int conversion function " << e.what() << std::endl;
+		} catch (std::out_of_range e) {
+			std::cout << "Out of range argument passed to string to int conversion function " << e.what() << std::endl;
+		}	
 
 		toConvertStart = toConvertEnd + 1;
 		toConvertEnd = std::find(toConvertStart, input.end(), ' ');
@@ -51,11 +67,14 @@ public:
 	SpeedTest()
 	{
 		std::cout << "Starting performance analysis." << std::endl;
+#ifdef _WIN32
 		QueryPerformanceCounter(&startTime);
+#endif
 	}
 
 	~SpeedTest()
 	{
+#ifdef _WIN32
 		LARGE_INTEGER endTime;
 		LARGE_INTEGER freq;
 
@@ -63,10 +82,13 @@ public:
 		QueryPerformanceCounter(&endTime);
 
 		std::cout << "Elapsed time (microseconds): " << ((endTime.QuadPart - startTime.QuadPart) * 1000000) / freq.QuadPart << std::endl;
+#endif
 	}
 
 private:
+#ifdef _WIN32
 	LARGE_INTEGER startTime;
+#endif
 };
 
 int main(int argc, char *argv[])
@@ -86,7 +108,9 @@ int main(int argc, char *argv[])
 	usageStr += "\t-h --help\t\tThis screen\n\n";
 	usageStr += "INPUT_VEC: Space separated list of integers to sort.\n";
 
-	ParseArgs(argc, argv, "h[help]i[insertion-sort]m[merge-sort]q[quick-sort]", mappedArgs, usageStr);
+	if (false == ParseArgs(argc, argv, "h[help]i[insertion-sort]m[merge-sort]q[quick-sort]", mappedArgs, usageStr)) {
+		return -1;
+	}
 
 	for (auto &opt : mappedArgs)
 	{
@@ -103,7 +127,9 @@ int main(int argc, char *argv[])
 			break;
 		case 'h':
 			std::cout << usageStr.c_str() << std::endl;
+#ifdef _WIN32
 			system("PAUSE");
+#endif
 			return 0;
 		default: // mappedArgs[?]
 			StringToVec(opt.second, intVec);
@@ -134,7 +160,8 @@ int main(int argc, char *argv[])
 		PrintVec(dirtyCopy);
 		std::cout << std::endl;
 	}
-
+#ifdef _WIN32
 	system("Pause");
+#endif
 	return 0;
 }
