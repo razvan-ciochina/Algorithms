@@ -97,7 +97,10 @@ int main(int argc, char *argv[])
 	std::string usageStr = "USAGE: ";
 	std::vector<int> intVec;
 	std::string appName = argv[0];
-	appName.erase(appName.cbegin(), appName.cbegin() + appName.find_last_of('\\') + 1);
+	size_t last_slash = appName.find_last_of('\\');
+	if (last_slash != std::string::npos) {
+		appName.erase(appName.cbegin(), appName.cbegin() + last_slash + 1);
+	}
 	appName.erase(appName.cbegin() + appName.find_first_of('.'), appName.cend());
 	usageStr += appName;
 	usageStr += " [OPTIONS] INPUT_VEC\n\n";
