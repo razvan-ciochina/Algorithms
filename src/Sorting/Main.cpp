@@ -10,11 +10,14 @@
 #include "QuickSort.h"
 #include "MergeSort.h"
 #ifdef _WIN32
-#include "Windows.h"
+	#include "Windows.h"
 #else 
 // LINUX
 	#include <unistd.h>
 	#include <limits.h>
+	#include <sys/times.h>
+	#include <cstring>
+	#include <chrono>
 #endif
 
 class GlobalConfig
@@ -61,6 +64,12 @@ void PrintVec(const std::vector<int>& vec)
 	std::cout << "]";
 }
 
+void PrintErrnoStr() 
+{
+	std::cerr << "Error: " << strerror(errno) << std::endl;
+	errno = 0;
+}
+
 class SpeedTest
 {
 public:
@@ -69,6 +78,8 @@ public:
 		std::cout << "Starting performance analysis." << std::endl;
 #ifdef _WIN32
 		QueryPerformanceCounter(&startTime);
+#else
+		startTime = std::chrono::high_resolution_clock::now();
 #endif
 	}
 
@@ -82,12 +93,18 @@ public:
 		QueryPerformanceCounter(&endTime);
 
 		std::cout << "Elapsed time (microseconds): " << ((endTime.QuadPart - startTime.QuadPart) * 1000000) / freq.QuadPart << std::endl;
+#else
+		std::chrono::high_resolution_clock::time_point endTime = std::chrono::high_resolution_clock::now();
+		std::chrono::duration<double> elapsed =  (endTime - startTime);
+		std::cout << "Elapsed time (microseconds): " << std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count() << std::endl;
 #endif
 	}
 
 private:
 #ifdef _WIN32
 	LARGE_INTEGER startTime;
+#else
+	std::chrono::high_resolution_clock::time_point startTime;
 #endif
 };
 
@@ -108,9 +125,9 @@ int main(int argc, char *argv[])
 	usageStr += appName;
 	usageStr += " [OPTIONS] INPUT_VEC\n\n";
 	usageStr += "OPTIONS:\n\n";
-	usageStr += "\t-i --insertion-sort\t\tSort input vector through insertion sort\n";
-	usageStr += "\t-m --merge-sort\t\tSort input vector through merge sort\n";
-	usageStr += "\t-q --quick-sort\t\tSort input vector through quick sort\n";
+	usageStr += "\t-i --insertion-sort\tSort input vector by insertion sort\n";
+	usageStr += "\t-m --merge-sort\t\tSort input vector by merge sort\n";
+	usageStr += "\t-q --quick-sort\t\tSort input vector by quick sort\n";
 	usageStr += "\t-h --help\t\tThis screen\n\n";
 	usageStr += "INPUT_VEC: Space separated list of integers to sort.\n";
 

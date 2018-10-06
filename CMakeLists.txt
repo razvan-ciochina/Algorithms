@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.11)
-project (SortingAlgorithms)
+project (Algorithms)
 
 set (CMAKE_CXX_STANDARD 11)
 
