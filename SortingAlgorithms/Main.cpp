@@ -101,7 +101,10 @@ int main(int argc, char *argv[])
 	if (last_slash != std::string::npos) {
 		appName.erase(appName.cbegin(), appName.cbegin() + last_slash + 1);
 	}
-	appName.erase(appName.cbegin() + appName.find_first_of('.'), appName.cend());
+
+	if (appName.find(".") != std::string::npos) {	
+		appName.erase(appName.cbegin() + appName.find_first_of('.'), appName.cend());
+	}
 	usageStr += appName;
 	usageStr += " [OPTIONS] INPUT_VEC\n\n";
 	usageStr += "OPTIONS:\n\n";
@@ -163,6 +166,17 @@ int main(int argc, char *argv[])
 		PrintVec(dirtyCopy);
 		std::cout << std::endl;
 	}
+
+	if (globalConfig.mergeSort)
+	{
+		std::vector<int> dirtyCopy = intVec;
+		SpeedTest perfTest;
+		std::cout << "Sorted through mergeSort: ";
+		MergeSort(dirtyCopy);		
+		PrintVec(dirtyCopy);
+		std::cout << std::endl;
+	}
+
 #ifdef _WIN32
 	system("Pause");
 #endif
