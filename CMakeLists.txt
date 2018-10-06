@@ -3,4 +3,4 @@ project (SortingAlgorithms)
 
 set (CMAKE_CXX_STANDARD 11)
 
-add_subdirectory(SortingAlgorithms)
+add_subdirectory(src)
